@@ -11,16 +11,19 @@ class Sudoku:
     def generate_board(self):
 
         # List of 9 squares filled with zeroes
-        square = []
-        for i in range(9):
-            square.append(np.zeros((3,3), int))
+        square = np.zeros((9,3,3), int)
+        #print(square)
+        #for i in range(9):
+            #square.append(np.zeros((3,3), int))
 
         # Fill each of 9 squares, left to right, top to bottom
-        for i in range(3):
+        for i in range(9):
             for row in range(3):
                 # Find all elements that are not present in the current row
-                elements = [square[n][row] for n in range(i)]
+                elements = [square[n][row] for n in range((i // 3)*3, i)]
                 elements = np.setdiff1d(range(1,10), elements)
+
+                #elements = np.setdiff1d(elements, elements)
 
                 # Find all elements that are not present in the current Square
                 elements = np.setdiff1d(elements, square[i])
@@ -37,12 +40,39 @@ class Sudoku:
                 if len(test) < 3:
                     elements = np.setdiff1d(elements, test)
                     elements = np.random.choice(elements, 3 - len(test), replace=False)
-                    test = np.append(test, elements)
+
+                    elements = np.append(test, elements)
+
+
+                #Column
+                new_row = np.zeros((3), int)
+
+                for co in range(3):
+                    col = []
+                    for sq in range(i // 3):
+                        icol = i - 3 * (sq + 1)
+                        for rn in range(3):
+                            col.append(square[icol][rn][co])
+
+                    test = np.setdiff1d(elements, col)
+                    print(test)
+                    test = np.random.choice(test, 1, replace=False)
+                    elements = elements[elements != test]
+                    new_row[co] = test
+
+
+                #new_row = np.random.choice(elements, 3, replace=False)
 
                 # Lastly, shuffle elements and fill the row
-                square[i][row] = np.random.choice(test, 3, replace=False)
+                square[i][row] = new_row
+
+            """for i in range(3):
+                for p in range(3):
+                    print(square[i*3][p], square[i*3+1][p], square[i*3+2][p])
+                """print()
 
         # print(self.check(square))
+
 
         return square # return board
 
@@ -58,12 +88,14 @@ class Sudoku:
     # Print the board
     def print_board(self):
         board = self.board
-        for p in range(3):
-            print(board[0][p], board[1][p], board[2][p])
+        for i in range(3):
+            for p in range(3):
+                print(board[i*3][p], board[i*3+1][p], board[i*3+2][p])
+            print()
 
 
 def main():
-    for _ in range(1): 
+    for _ in range(1):
         game = Sudoku()
         game.print_board()
 
