@@ -1,7 +1,6 @@
 import numpy as np
 #import random
 import time
-import copy
 
 class Sudoku:
 
@@ -11,104 +10,51 @@ class Sudoku:
     #Function generates board 9x9 with random numbers
     def generate_board(self):
 
-        # List of 9 squares filled with zeroes
-        square = np.zeros((9,3,3), int)
-        #print(square)
-        #for i in range(9):
-            #square.append(np.zeros((3,3), int))
+        board = np.empty((3,3), dtype=object)
+        for j in range(3):
+            for k in range(3):
+                board[j][k] = np.zeros((3,3), int)
 
-        # Fill each of 9 squares, left to right, top to bottom
-        for i in range(4):
-            for row in range(3):
-                # Find all elements that are not present in the current row
-                elements = [square[n][row] for n in range((i // 3)*3, i)]
-                elements = np.setdiff1d(range(1,10), elements)
+        for j in range(3):
+            for k in range(3):
+                square = board[j][k]
+                availeble_elements = range(1,10)
 
-                # Find all elements that are not present in the current Square
-                elements = np.setdiff1d(elements, square[i])
+                for square_row in range(3):
 
-                # Choose elements so at least 3 elements are available for each row
-                # These elements must be included in the current row
-                test = set()
-                for n in range(row, 2):
-                    print(square[i-1][n+1])
-                    test.update(square[i-1][n+1])
-                #test = np.trim_zeros(np.intersect1d(elements, test, assume_unique=True))
+                    # remove all from the same row
+                    row_elements = []
+                    for i in range(k):
+                        row_elements.append(board[j][i][square_row])
 
-                print(test)
+                    row_elements = np.setdiff1d(availeble_elements, row_elements)
 
-                # If number of elements that have to be included is less than 3,
-                # Chose random ones
-                """if len(test) < 3:
-                    elements = np.setdiff1d(elements, test)
-                    elements = np.random.choice(elements, 3 - len(test), replace=False)
-
-                    test = np.append(test, elements)
-                """
-
-                #Column
-                square = self.transpose(square)
-
-                for n in range(row, 2):
-                    test.update(square[i-1][n+1])
-                    #test = np.append(test, square[i-1][n+1]).astype(int)
-                test = np.trim_zeros(np.intersect1d(elements, list(test), assume_unique=True))
-
-                print(test)
-
-                # If number of elements that have to be included is less than 3,
-                # Chose random ones
-                if len(test) < 3:
-                    elements = np.setdiff1d(elements, test)
-                    elements = np.random.choice(elements, 3 - len(test), replace=False)
-
-                    test = np.append(test, elements)
-
-                square = self.transpose(square)
+                    if square_row == 1:
+                        print("mid square")
+                        intersect = []
+                        for i in range(k):
+                            intersect = npappend(board[j][i-1][2])
+                        row_elements = np.trim_zeros(np.intersect1d(row_elements, intersect, assume_unique=True))
+                        if len(row_elements) < 3:
+                            temp = np.setdiff1d(availeble_elements, row_elements)
+                            temp = np.random.choice(temp, 3 - len(row_elements), replace=False)
+                            row_elements = np.append(row_elements, temp)
+                        print(intersect)
 
 
-                new_row = np.random.choice(test, 3, replace=False)
+                    print(row_elements)
 
-                square[i][row] = new_row
+                    for square_col in range(3):
+                        new_number = np.random.choice(row_elements, 1, replace=False)[0]
+                        square[square_row][square_col] = new_number
+                        row_elements = np.delete(row_elements, np.where(row_elements == new_number))
 
-                self.print_board(square)
+                        self.print_board(board)
 
-                #Column
-                """
-                new_row = np.zeros((3), int)
-
-                for co in range(3):
-                    col = []
-                    for sq in range(i // 3):
-                        icol = i - 3 * (sq + 1)
-                        for rn in range(3):
-                            col.append(square[icol][rn][co])
-
-                    test = np.setdiff1d(elements, col)
-                    print(test)
-                    test = np.random.choice(test, 1, replace=False)
-                    elements = elements[elements != test]
-                    new_row[co] = test
-
-                """
-
-                #new_row = np.random.choice(elements, 3, replace=False)
-
-                # Lastly, shuffle elements and fill the row
+                    availeble_elements = np.setdiff1d(availeble_elements, square[square_row])
 
 
-
-            """for i in range(3):
-                for p in range(3):
-                    print(square[i*3][p], square[i*3+1][p], square[i*3+2][p])
-            print()
-            """
-        #print(square)
-
-        # print(self.check(square))
-
-
-        return square # return board
+        return board # return board
 
     # Function returns transposed board
     def transpose(self, board = None):
@@ -139,11 +85,16 @@ class Sudoku:
         if board is None:
             board = self.board
 
-        for i in range(3):
-            for p in range(3):
-                print(board[i*3][p], board[i*3+1][p], board[i*3+2][p])
+        print()
+        for j in range(3):
+            for row in range(3):
+                for k in range(3):
+                    print(' ', end='')
+                    for col in range(3):
+                        print(board[j][k][row][col], end=' ')
+                    print(' ', end='')
+                print()
             print()
-
 
 def main():
     for _ in range(1):
@@ -154,5 +105,3 @@ if __name__ == "__main__":
     start = time.time()
     main()
     print('\n executed in', time.time() - start, 'second')
-
-#game.print_board()
