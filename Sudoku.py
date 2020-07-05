@@ -29,27 +29,29 @@ class Sudoku:
 
                     row_elements = np.setdiff1d(availeble_elements, row_elements)
 
-                    if square_row == 1:
-                        print("mid square")
-                        intersect = []
-                        for i in range(k):
-                            intersect = npappend(board[j][i-1][2])
-                        row_elements = np.trim_zeros(np.intersect1d(row_elements, intersect, assume_unique=True))
-                        if len(row_elements) < 3:
-                            temp = np.setdiff1d(availeble_elements, row_elements)
-                            temp = np.random.choice(temp, 3 - len(row_elements), replace=False)
-                            row_elements = np.append(row_elements, temp)
-                        print(intersect)
+                    if len(row_elements) > 3:
+                        if square_row == 1 and k > 0:
+                            intersect = []
 
+                            for i in range(k):
+                                intersect = np.append(intersect, board[j][i][2])
 
-                    print(row_elements)
+                            intersect = np.trim_zeros(np.intersect1d(row_elements, intersect, assume_unique=True))
+
+                            if len(intersect) < 3:
+                                temp = np.setdiff1d(row_elements, intersect)
+                                temp = np.random.choice(temp, 3 - len(intersect), replace=False)
+                                row_elements = np.append(intersect, temp)
+                            else:
+                                row_elements = intersect
+
 
                     for square_col in range(3):
                         new_number = np.random.choice(row_elements, 1, replace=False)[0]
                         square[square_row][square_col] = new_number
                         row_elements = np.delete(row_elements, np.where(row_elements == new_number))
 
-                        self.print_board(board)
+                        #self.print_board(board)
 
                     availeble_elements = np.setdiff1d(availeble_elements, square[square_row])
 
@@ -72,12 +74,16 @@ class Sudoku:
         return new_board
 
     # Function returns True if each square and row has all 9 numbers
-    def check(self, board):
-        for i in range(3):
-            if set(np.concatenate(board[i])) != set(range(1,10)):
-               return False
-            if set(np.concatenate((board[0][i], board[1][i], board[2][i]))) != set(range(1,10)):
-                return False
+    def check(self, board = None):
+        if board is None:
+            board = self.board
+
+        for j in range(3):
+            for k in range(3):
+                if set(np.concatenate(board[j][k])) != set(range(1,10)):
+                   return False
+                if set(np.concatenate((board[j][0][k], board[j][1][k], board[j][2][k]))) != set(range(1,10)):
+                   return False
             return True
 
     # Print the board
@@ -97,9 +103,10 @@ class Sudoku:
             print()
 
 def main():
-    for _ in range(1):
+    for _ in range(1000):
         game = Sudoku()
-        game.print_board()
+        #game.print_board()
+        print(game.check())
 
 if __name__ == "__main__":
     start = time.time()
